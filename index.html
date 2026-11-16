@@ -22,7 +22,10 @@
             </div>
 
             <h3 id="cartTotal">Total: ₹0</h3>
-            <button id="clearCart">Clear Cart</button>
+            <div class="cart-actions">
+                <button id="clearCart" type="button">Clear Cart</button>
+                <button id="checkoutButton" class="primary-button" type="button">Proceed to Checkout →</button>
+            </div>
 
         </div>
 
@@ -113,6 +116,10 @@
     </footer>
 
 
+    <div id="cartNotification" class="cart-notification" role="status"
+         aria-live="polite" aria-atomic="true"></div>
+
+    <script src="store.js"></script>
     <script src="script.js"></script>
 
 </body>

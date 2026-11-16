@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout — EcomStore</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="checkout.css">
+</head>
+<body>
+    <header class="checkout-header">
+        <a href="index.html" class="logo">EcomStore</a>
+        <a class="back-link" href="index.html">← Continue shopping</a>
+    </header>
+
+    <main class="container checkout-container">
+        <div class="checkout-heading">
+            <p class="eyebrow">ONE STEP CLOSER TO YOUR FAVORITES</p>
+            <h1>Make it yours.</h1>
+            <p>Add your delivery details, apply a little saving, and review your order.</p>
+            <ol class="checkout-steps" aria-label="Checkout progress">
+                <li>1. Cart</li>
+                <li aria-current="step">2. Address &amp; offers</li>
+                <li>3. Payment</li>
+            </ol>
+        </div>
+
+        <div id="emptyCheckout" class="checkout-card empty-checkout" hidden>
+            <h2>Your cart is waiting for something good.</h2>
+            <p>Add a product to start your checkout.</p>
+            <a class="primary-button" href="index.html">Explore products →</a>
+        </div>
+
+        <div id="checkoutContent" class="checkout-layout">
+            <section class="checkout-card" aria-labelledby="addressHeading">
+                <p class="eyebrow">DELIVERED TO YOUR DOOR</p>
+                <h2 id="addressHeading">Delivery address</h2>
+                <p class="section-note">Your details are saved on this browser as you type.</p>
+                <form id="addressForm">
+                    <fieldset id="addressFields" class="address-fields">
+                        <legend class="visually-hidden">Contact and delivery details</legend>
+                        <label>Full name
+                            <input name="fullName" autocomplete="name" maxlength="100" placeholder="Your full name" required>
+                        </label>
+                        <label>Email address
+                            <input name="email" type="email" autocomplete="email" maxlength="150" placeholder="you@example.com" required>
+                        </label>
+                        <label>Mobile number
+                            <input name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" pattern="[6-9][0-9]{9}" maxlength="10" title="Enter a valid 10-digit Indian mobile number" placeholder="10-digit mobile number" required>
+                        </label>
+                        <label>PIN code
+                            <input name="pincode" inputmode="numeric" autocomplete="postal-code" pattern="[1-9][0-9]{5}" maxlength="6" title="Enter a valid 6-digit PIN code" placeholder="6-digit PIN code" required>
+                        </label>
+                        <label class="full-width">Street address
+                            <textarea name="street" autocomplete="street-address" rows="3" maxlength="400" placeholder="House / flat number, building, street and area" required></textarea>
+                        </label>
+                        <label>City
+                            <input name="city" autocomplete="address-level2" maxlength="100" placeholder="City" required>
+                        </label>
+                        <label>State / Union territory
+                            <input name="state" autocomplete="address-level1" maxlength="100" placeholder="State / Union territory" required>
+                        </label>
+                        <p class="delivery-country full-width">Delivering within India</p>
+                    </fieldset>
+                </form>
+            </section>
+
+            <aside class="checkout-card order-summary" aria-labelledby="summaryHeading">
+                <div class="summary-heading">
+                    <h2 id="summaryHeading">Your order</h2>
+                    <span id="checkoutItemCount" class="item-count"></span>
+                </div>
+                <div id="orderItems" class="order-items"></div>
+
+                <form id="couponForm" class="coupon-form">
+                    <label for="couponInput">Have a coupon?</label>
+                    <div class="coupon-controls">
+                        <input id="couponInput" maxlength="30" placeholder="Enter code" autocomplete="off" aria-describedby="couponMessage couponHelp">
+                        <button class="secondary-button" type="submit">Apply</button>
+                    </div>
+                    <p id="couponHelp" class="section-note">Try WELCOME10: 10% off, up to ₹500.<br>SAVE200: ₹200 off orders of ₹1,999 or more.</p>
+                    <p id="couponMessage" class="coupon-message" role="status" aria-live="polite"></p>
+                    <button id="removeCoupon" class="text-button" type="button" hidden>Remove coupon</button>
+                </form>
+
+                <dl class="order-totals" aria-live="polite">
+                    <div><dt>Subtotal</dt><dd id="orderSubtotal">₹0</dd></div>
+                    <div><dt>Delivery</dt><dd class="free-delivery">Free</dd></div>
+                    <div id="discountRow" hidden><dt>Coupon discount</dt><dd id="orderDiscount">−₹0</dd></div>
+                    <div class="grand-total"><dt>Total</dt><dd id="orderTotal">₹0</dd></div>
+                </dl>
+                <button id="proceedPayment" class="primary-button payment-button" type="submit" form="addressForm">Proceed to Payment →</button>
+                <p class="payment-note">Review your payment options in the next step.</p>
+            </aside>
+        </div>
+    </main>
+
+    <dialog id="paymentDialog" class="payment-dialog" aria-labelledby="paymentHeading">
+        <button id="closePayment" class="dialog-close" type="button" aria-label="Close payment options">×</button>
+        <p class="eyebrow">PAYMENT PREVIEW</p>
+        <h2 id="paymentHeading">Payment options</h2>
+        <p id="paymentAmount" class="payment-amount"></p>
+        <p id="deliveryPreview" class="section-note"></p>
+        <div class="payment-methods">
+            <div><strong>UPI</strong><span>Google Pay, PhonePe, Paytm &amp; other UPI apps</span></div>
+            <div><strong>Debit / credit card</strong><span>Pay through a connected payment provider</span></div>
+        </div>
+        <p class="demo-note">This store is a demo. A payment gateway needs to be connected to enable these options. No payment has been taken and no order has been placed.</p>
+        <button id="backToCheckout" class="primary-button" type="button">Back to checkout</button>
+    </dialog>
+
+    <footer class="footer"><p>© 2026 EcomStore Built as learning Project</p></footer>
+    <script src="store.js"></script>
+    <script src="checkout.js"></script>
+</body>
+</html>

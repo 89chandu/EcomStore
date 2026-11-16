@@ -23,7 +23,7 @@ const closeModal = document.getElementById("closeModal")
 // step 2 
 // Initial project data 
 
-const products = [ 
+const defaultProducts = [
 
     {
         id:1,
@@ -58,7 +58,7 @@ const products = [
 
 
     {
-        id:3,
+        id:4,
         name:"Running Shoes",
         price:1999,
         category:"fashion",
@@ -70,7 +70,7 @@ const products = [
 
 
     {
-        id:1,
+        id:5,
         name:"Wireless Headphones",
         price:1499,
         category:"electronics",
@@ -81,7 +81,7 @@ const products = [
 
 
     {
-        id:2,
+        id:6,
         name:"Smart Watch",
         price:1499,
         category:"electronics",
@@ -91,7 +91,7 @@ const products = [
     },
 
     {
-        id:1,
+        id:7,
         name:"Wireless Headphones",
         price:1499,
         category:"electronics",
@@ -102,7 +102,7 @@ const products = [
 
 
     {
-        id:3,
+        id:8,
         name:"Running Shoes",
         price:1999,
         category:"fashion",
@@ -113,7 +113,7 @@ const products = [
 
 
     {
-        id:1,
+        id:9,
         name:"Wireless Headphones",
         price:1499,
         category:"electronics",
@@ -124,7 +124,7 @@ const products = [
 
 
     {
-        id:2,
+        id:10,
         name:"Smart Watch",
         price:1499,
         category:"electronics",
@@ -134,7 +134,7 @@ const products = [
     },
 
     {
-        id:1,
+        id:11,
         name:"Wireless Headphones",
         price:1499,
         category:"electronics",
@@ -145,7 +145,7 @@ const products = [
 
 
     {
-        id:3,
+        id:12,
         name:"Running Shoes",
         price:1999,
         category:"fashion",
@@ -157,7 +157,7 @@ const products = [
 
 
     {
-        id:1,
+        id:13,
         name:"Wireless Headphones",
         price:1499,
         category:"electronics",
@@ -168,7 +168,7 @@ const products = [
 
 
     {
-        id:2,
+        id:14,
         name:"Smart Watch",
         price:1499,
         category:"electronics",
@@ -178,7 +178,7 @@ const products = [
     },
 
     {
-        id:1,
+        id:15,
         name:"Wireless Headphones",
         price:1499,
         category:"electronics",
@@ -189,7 +189,7 @@ const products = [
 
 
     {
-        id:3,
+        id:16,
         name:"Running Shoes",
         price:1999,
         category:"fashion",
@@ -199,7 +199,7 @@ const products = [
     },
 
         {
-        id:13,
+        id:17,
         name:"Tu 13wa hai Shoes",
         price:1999,
         category:"fashion",
@@ -212,19 +212,32 @@ const products = [
 ]
 
 
-const cart = []
+const products = readStorage(storageKeys.products, defaultProducts, value =>
+    Array.isArray(value) && value.every(isValidProduct) &&
+    new Set(value.map(product => product.id)).size === value.length
+)
+writeStorage(storageKeys.products, products)
+
+const cart = readCart(products)
+
+const savedFilters = readStorage(storageKeys.filters, {}, value =>
+    value !== null && typeof value === "object" && !Array.isArray(value)
+)
+searchInput.value = typeof savedFilters.search === "string" ? savedFilters.search : ""
+sortSelect.value = ["default", "price-low", "price-high", "rating"].includes(savedFilters.sort)
+    ? savedFilters.sort : "default"
 
 // helper function to escAPE HTML
 
 function escapeHTML(value) {
  return String(value).replace(/[&<>"']/g,character => {
-    // const entities = {
-    //     // "&": "&amp",
-    //     // "<": "&lt",
-    //     // ">": "&gt",
-    //     // '"': "&qout",
-    //     // "'": "&#39"
-    // }
+    const entities = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    }
     return entities[character]
  })
 
@@ -294,7 +307,7 @@ function renderProducts(productList) {
         type="button"
         data-product-id="${Number(product.id)}"
         
-        title="Cart funntionality coming on Day 6"
+        title="Add to cart"
         >
         Add to cart
         </button>
@@ -310,61 +323,10 @@ function renderProducts(productList) {
 
 }
 
-renderProducts(products)
-
-
-
-// Search Function
-
-function SearchProduct() {
-
-    //step 1 : get search input
-    const searchTerm = searchInput.value
-    .toLowerCase()
-    .trim()
-
-
-    // step 2 : filter matching products
-
-    const filteredProducts = products.filter(product => {
-        return product.name
-               .toLowerCase()
-               .includes(searchTerm)
-    })
-
-    // step 3 : Render Matching products
-
-    renderProducts(filteredProducts)
-
-// step 4 : show result in console  
-
-console.log("Search term :",searchTerm)
-console.log("matching Products :",filteredProducts.length)
-
-}
-
-
-// search button click
-
-searchBtn.addEventListener("click",SearchProduct)
-
-// search while typing
-
-searchInput.addEventListener("input" , SearchProduct)
-
-searchInput.addEventListener("keydown" , function(event) {
-    if(event.key === "Enter") {
-        SearchProduct()
-
-    }
-})
-
-
-
-
 // Apply Filters
 
-let selectedCategory = "all"
+let selectedCategory = ["all", "electronics", "fashion", "computer", "home"].includes(savedFilters.category)
+    ? savedFilters.category : "all"
 
 
 function applyFilters() {
@@ -379,6 +341,7 @@ function applyFilters() {
         return product.name
         .toLowerCase()
         .trim()
+        .includes(searchTerm)
     })
 
     // category filter
@@ -405,6 +368,16 @@ function applyFilters() {
     }
 
 
+
+    writeStorage(storageKeys.filters, {
+        search: searchInput.value,
+        category: selectedCategory,
+        sort: sortValue
+    })
+
+    categoryFilters.querySelectorAll("button[data-category]").forEach(button => {
+        button.classList.toggle("active", button.dataset.category === selectedCategory)
+    })
 
     // update webpage
     renderProducts(filteredProducts)
@@ -470,7 +443,7 @@ function openProductModal(productId) {
     <img
         class="modal-product-image"
         src="${escapeHTML(product.image)}"
-        alt="${product.name}"
+        alt="${escapeHTML(product.name)}"
     >
 
     <h2 class="modal-product-name">
@@ -547,6 +520,18 @@ const closeCart = document.getElementById("closeCart")
 const cartItemsContainer = document.getElementById("cartItems")
 const cartTotal = document.getElementById("cartTotal")
 const clearCartButton = document.getElementById("clearCart")
+const checkoutButton = document.getElementById("checkoutButton")
+const cartNotification = document.getElementById("cartNotification")
+let cartNotificationTimeout
+
+function showCartNotification(productName) {
+    clearTimeout(cartNotificationTimeout)
+    cartNotification.textContent = `${productName} has been added to your cart successfully!`
+
+    cartNotificationTimeout = setTimeout(() => {
+        cartNotification.textContent = ""
+    }, 3500)
+}
 
 // cart data
 
@@ -575,12 +560,17 @@ function addTocart(productId) {
     }
 
     updateCart()
+    showCartNotification(product.name)
 }
 
 // update cart
 
 
 function updateCart() {
+    // Every add, quantity change, removal and clear goes through this function.
+    writeStorage(storageKeys.cart, cart)
+    checkoutButton.disabled = cart.length === 0
+
     const totaItems = cart.reduce(
         (total,item) => total + item.quantity,
         0
@@ -713,6 +703,11 @@ clearCartButton.addEventListener("click" , function() {
 
 // initial cart display
 
+checkoutButton.addEventListener("click", function() {
+    if (cart.length > 0) window.location.href = "checkout.html"
+})
+
+applyFilters()
 updateCart()
 
 
