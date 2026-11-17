@@ -21,7 +21,7 @@
             <ol class="checkout-steps" aria-label="Checkout progress">
                 <li>1. Cart</li>
                 <li aria-current="step">2. Address &amp; offers</li>
-                <li>3. Payment</li>
+                <li id="paymentStep">3. Payment</li>
             </ol>
         </div>
 
@@ -90,23 +90,54 @@
                     <div class="grand-total"><dt>Total</dt><dd id="orderTotal">₹0</dd></div>
                 </dl>
                 <button id="proceedPayment" class="primary-button payment-button" type="submit" form="addressForm">Proceed to Payment →</button>
-                <p class="payment-note">Review your payment options in the next step.</p>
+                <p class="payment-note">Try checkout with a dummy card. No real payment is taken.</p>
             </aside>
         </div>
     </main>
 
-    <dialog id="paymentDialog" class="payment-dialog" aria-labelledby="paymentHeading">
-        <button id="closePayment" class="dialog-close" type="button" aria-label="Close payment options">×</button>
-        <p class="eyebrow">PAYMENT PREVIEW</p>
-        <h2 id="paymentHeading">Payment options</h2>
+    <dialog id="paymentDialog" class="payment-dialog" aria-labelledby="paymentHeading" aria-describedby="demoPaymentNote">
+        <button id="closePayment" class="dialog-close" type="button" aria-label="Close payment">×</button>
+        <p class="eyebrow">DEMO CHECKOUT</p>
+        <h2 id="paymentHeading">Complete your order</h2>
         <p id="paymentAmount" class="payment-amount"></p>
         <p id="deliveryPreview" class="section-note"></p>
-        <div class="payment-methods">
-            <div><strong>UPI</strong><span>Google Pay, PhonePe, Paytm &amp; other UPI apps</span></div>
-            <div><strong>Debit / credit card</strong><span>Pay through a connected payment provider</span></div>
-        </div>
-        <p class="demo-note">This store is a demo. A payment gateway needs to be connected to enable these options. No payment has been taken and no order has been placed.</p>
-        <button id="backToCheckout" class="primary-button" type="button">Back to checkout</button>
+        <p id="demoPaymentNote" class="demo-note">These dummy payment details are ready to use. No real money will be charged. This creates a demo order only.</p>
+        <form id="paymentForm">
+            <fieldset id="paymentFields" class="payment-fields">
+                <legend>Dummy debit / credit card</legend>
+                <label class="full-width">Cardholder name
+                    <input value="ECOM DEMO CUSTOMER" readonly autocomplete="off">
+                </label>
+                <label class="full-width">Card number
+                    <input value="4242 4242 4242 4242" readonly autocomplete="off">
+                </label>
+                <label>Expiry date
+                    <input value="12/30" readonly autocomplete="off">
+                </label>
+                <label>CVV
+                    <input value="123" readonly autocomplete="off">
+                </label>
+            </fieldset>
+            <p id="paymentStatus" class="payment-status" role="status" aria-live="polite"></p>
+            <button id="placeOrder" class="primary-button payment-button" type="submit">Place demo order</button>
+        </form>
+        <button id="backToCheckout" class="text-button" type="button">← Back to checkout</button>
+    </dialog>
+
+    <dialog id="successDialog" class="payment-dialog success-dialog" aria-labelledby="successHeading" aria-describedby="successDescription">
+        <button id="closeSuccess" class="dialog-close" type="button" aria-label="Close order confirmation">×</button>
+        <div class="success-icon" aria-hidden="true">✓</div>
+        <p class="eyebrow">THANK YOU FOR SHOPPING WITH US</p>
+        <h2 id="successHeading">Order placed successfully!</h2>
+        <p id="successDescription" class="section-note">Your demo order is confirmed. No payment was charged and no items will be shipped.</p>
+        <dl class="order-totals success-details">
+            <div><dt>Order number</dt><dd id="successOrderNumber"></dd></div>
+            <div><dt>Items</dt><dd id="successItemCount"></dd></div>
+            <div><dt>Payment</dt><dd>Demo card ···· 4242</dd></div>
+            <div class="grand-total"><dt>Order total</dt><dd id="successTotal"></dd></div>
+        </dl>
+        <p id="successDelivery" class="section-note"></p>
+        <a href="index.html" class="primary-button payment-button">Continue shopping →</a>
     </dialog>
 
     <footer class="footer"><p>© 2026 EcomStore Built as learning Project</p></footer>

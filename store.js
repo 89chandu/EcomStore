@@ -3,7 +3,8 @@ const storageKeys = {
     products: "ecomStore.products",
     cart: "ecomStore.cart",
     filters: "ecomStore.filters",
-    checkout: "ecomStore.checkout"
+    checkout: "ecomStore.checkout",
+    lastOrder: "ecomStore.lastOrder"
 }
 
 function readStorage(key, fallback, isValid) {
@@ -22,8 +23,10 @@ function readStorage(key, fallback, isValid) {
 function writeStorage(key, value) {
     try {
         localStorage.setItem(key, JSON.stringify(value))
+        return true
     } catch (error) {
         console.warn(`Could not save ${key} to localStorage.`, error)
+        return false
     }
 }
 

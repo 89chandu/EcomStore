@@ -710,6 +710,17 @@ checkoutButton.addEventListener("click", function() {
 applyFilters()
 updateCart()
 
+// Restore the saved cart when returning from checkout, including browser Back.
+function syncCartFromStorage() {
+    cart.splice(0, cart.length, ...readCart(products))
+    updateCart()
+}
+
+window.addEventListener("pageshow", syncCartFromStorage)
+window.addEventListener("storage", event => {
+    if (event.key === null || event.key === storageKeys.cart) syncCartFromStorage()
+})
+
 
 
 

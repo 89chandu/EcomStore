@@ -4,9 +4,32 @@ const couponInput = document.getElementById("couponInput")
 const couponMessage = document.getElementById("couponMessage")
 const removeCoupon = document.getElementById("removeCoupon")
 const paymentDialog = document.getElementById("paymentDialog")
+const paymentForm = document.getElementById("paymentForm")
+const paymentStatus = document.getElementById("paymentStatus")
+const successDialog = document.getElementById("successDialog")
+const placeOrderButton = document.getElementById("placeOrder")
 const addressNames = ["fullName", "email", "phone", "pincode", "street", "city", "state"]
 let checkoutCart = []
 let appliedCoupon = ""
+let paymentTimer = null
+let paymentQuote = ""
+
+function orderSignature() {
+    return JSON.stringify({ items: checkoutCart, coupon: appliedCoupon, total: getSubtotal() - getDiscount() })
+}
+
+function setPaymentBusy(busy) {
+    paymentForm.setAttribute("aria-busy", String(busy))
+    document.getElementById("paymentFields").disabled = busy
+    placeOrderButton.disabled = busy
+    placeOrderButton.textContent = busy ? "Placing demo order…" : `Place demo order · ${money(getSubtotal() - getDiscount())}`
+}
+
+function showPaymentError(message) {
+    paymentStatus.textContent = message
+    paymentStatus.classList.add("is-error")
+    setPaymentBusy(false)
+}
 
 function money(amount) {
     return `₹${amount.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`
@@ -164,11 +187,103 @@ addressForm.addEventListener("submit", event => {
     document.getElementById("paymentAmount").textContent = money(getSubtotal() - getDiscount())
     document.getElementById("deliveryPreview").textContent =
         `Deliver to ${addressForm.elements.namedItem("fullName").value}, ${addressForm.elements.namedItem("city").value} — ${addressForm.elements.namedItem("pincode").value}`
+    paymentQuote = orderSignature()
+    paymentStatus.textContent = ""
+    paymentStatus.classList.remove("is-error")
+    setPaymentBusy(false)
+    document.querySelector(".checkout-steps [aria-current]")?.removeAttribute("aria-current")
+    document.getElementById("paymentStep").setAttribute("aria-current", "step")
     paymentDialog.showModal()
 })
 
 document.getElementById("closePayment").addEventListener("click", () => paymentDialog.close())
 document.getElementById("backToCheckout").addEventListener("click", () => paymentDialog.close())
+paymentDialog.addEventListener("close", () => {
+    clearTimeout(paymentTimer)
+    paymentTimer = null
+    setPaymentBusy(false)
+    document.getElementById("paymentStep").removeAttribute("aria-current")
+    document.querySelector(".checkout-steps li:nth-child(2)").setAttribute("aria-current", "step")
+})
+
+paymentForm.addEventListener("submit", event => {
+    event.preventDefault()
+    if (paymentTimer !== null) return
+    refreshOrder()
+    if (!checkoutCart.length) {
+        paymentDialog.close()
+        return
+    }
+    if (paymentQuote !== orderSignature()) {
+        paymentQuote = orderSignature()
+        document.getElementById("paymentAmount").textContent = money(getSubtotal() - getDiscount())
+        showPaymentError("Your order changed. Review the updated total, then place your demo order again.")
+        return
+    }
+
+    setPaymentBusy(true)
+    paymentStatus.classList.remove("is-error")
+    paymentStatus.textContent = "Simulating payment. No money is being charged…"
+
+    // Simulate an asynchronous payment response without calling a payment gateway.
+    paymentTimer = setTimeout(() => {
+        paymentTimer = null
+        refreshOrder()
+        if (!checkoutCart.length) {
+            paymentDialog.close()
+            return
+        }
+        if (paymentQuote !== orderSignature()) {
+            paymentQuote = orderSignature()
+            document.getElementById("paymentAmount").textContent = money(getSubtotal() - getDiscount())
+            showPaymentError("Your order changed. Review the updated total, then place your demo order again.")
+            return
+        }
+
+        const address = {}
+        addressNames.forEach(name => { address[name] = addressForm.elements.namedItem(name).value.trim() })
+        const order = {
+            id: `ECOM-${Date.now().toString(36).toUpperCase()}-${crypto.randomUUID().slice(0, 4).toUpperCase()}`,
+            createdAt: new Date().toISOString(),
+            status: "demo-confirmed",
+            items: checkoutCart.map(({ id, name, price, quantity }) => ({ id, name, price, quantity })),
+            address,
+            subtotal: getSubtotal(),
+            coupon: appliedCoupon,
+            discount: getDiscount(),
+            total: Math.round((getSubtotal() - getDiscount()) * 100) / 100,
+            payment: { method: "demo-card", last4: "4242", status: "simulated" }
+        }
+        const previousOrder = readStorage(storageKeys.lastOrder, null, value => value === null || typeof value === "object")
+        if (!writeStorage(storageKeys.lastOrder, order)) {
+            showPaymentError("Your order could not be saved. Allow browser storage and try again. Your cart is still here.")
+            return
+        }
+        if (!writeStorage(storageKeys.cart, [])) {
+            writeStorage(storageKeys.lastOrder, previousOrder)
+            showPaymentError("Your cart could not be updated. Allow browser storage and try again.")
+            return
+        }
+
+        appliedCoupon = ""
+        couponInput.value = ""
+        showCouponMessage("")
+        saveCheckout()
+        refreshOrder()
+        document.getElementById("successOrderNumber").textContent = order.id
+        document.getElementById("successItemCount").textContent = order.items.reduce((total, item) => total + item.quantity, 0)
+        document.getElementById("successTotal").textContent = money(order.total)
+        document.getElementById("successDelivery").textContent =
+            `Delivery details: ${address.fullName}, ${address.street}, ${address.city}, ${address.state} — ${address.pincode}.`
+        paymentDialog.close()
+        successDialog.showModal()
+    }, 800)
+})
+
+document.getElementById("closeSuccess").addEventListener("click", () => successDialog.close())
+successDialog.addEventListener("close", () => {
+    document.querySelector("#emptyCheckout .primary-button").focus()
+})
 
 window.addEventListener("pageshow", refreshOrder)
 window.addEventListener("storage", event => {
